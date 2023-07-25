@@ -2,8 +2,10 @@ package com.spring.configclient;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 @SpringBootApplication
+@EntityScan("com.spring.configclient.database.entity")
 public class ConfigClientApplication {
 
 	public static void main(String[] args) {

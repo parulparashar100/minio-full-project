@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConfigurationProperties {
 	
-	@Value("${message}")
+//	@Value("${message}")
 	private String message;
 
 	public String getMessage() {

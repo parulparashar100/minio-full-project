@@ -1,26 +1,21 @@
 package com.spring.configclient.hashing;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.security.DigestInputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class FileHashing {
 	
-    public String generateHash(File file) {
+    public String generateHash(String str) {
       try {
           MessageDigest md = MessageDigest.getInstance("SHA-256");
-          FileInputStream fin = new FileInputStream(file);
-          DigestInputStream dis = new DigestInputStream(fin, md);
-
-          // Read the file contents
-          byte[] buffer = new byte[4096];
-          while (dis.read(buffer) != -1) {
-              // Reading the file, but we don't need to do anything here
-          }
+          
+          byte[] inputBytes = str.getBytes(StandardCharsets.UTF_8);          
 
           // Get the hash value as a byte array
-          byte[] hashBytes = md.digest();
+          byte[] hashBytes = md.digest(inputBytes);
 
           // Convert the byte array to a hexadecimal string
           StringBuilder sb = new StringBuilder();
@@ -29,9 +24,6 @@ public class FileHashing {
           }
           String hash = sb.toString();
 
-          System.out.println("MD5 hash: " + hash);
-
-          dis.close();
           return hash;
       } catch (Exception e) {
           e.printStackTrace();
@@ -39,11 +31,8 @@ public class FileHashing {
       }
   }
   
-  public boolean verifyHash(File file, String originalHash) {
-  	String newHash = generateHash(file);
-  	
-  	System.out.println("Original Hash : " + originalHash);
-	System.out.println("New Hash : " + newHash);
+  public boolean verifyHash(String str, String originalHash) {
+  	String newHash = generateHash(str);
 	
   	if(newHash.equals(originalHash))
   		return true;
