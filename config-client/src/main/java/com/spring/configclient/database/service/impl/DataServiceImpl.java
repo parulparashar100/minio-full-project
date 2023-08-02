@@ -2,10 +2,13 @@ package com.spring.configclient.database.service.impl;
 
 import java.util.Optional;
 
+import org.springframework.stereotype.Service;
+
 import com.spring.configclient.database.entity.Data;
 import com.spring.configclient.database.repository.DataRepository;
 import com.spring.configclient.database.service.DataService;
 
+@Service
 public class DataServiceImpl implements DataService {
 
     private DataRepository dataRepository;

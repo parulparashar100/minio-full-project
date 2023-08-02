@@ -44,7 +44,13 @@ public class Bucket {
 		
 	}
 
+	public String getBucketId() {
+		return bucketId;
+	}
 	
+	public void setBucketId(String bucketId) {
+		this.bucketId = bucketId;
+	}
 
 	public String getBucketName() {
 		return bucketName;

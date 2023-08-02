@@ -24,10 +24,9 @@ public class Data {
     @Column(name = "Api_File_Path")
     private String apiFilePath;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "Bucket_Name")
-    @Column(name = "Bucket_Name")
-    private String bucket;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "Bucket_Name")
+    private Bucket bucket;
 
     @Column(name = "Desination_File_Name")
     private String destinationFileName;
@@ -93,11 +92,11 @@ public class Data {
 		this.apiFilePath = apiFilePath;
 	}
 
-	public String getBucket() {
+	public Bucket getBucket() {
 		return bucket;
 	}
 
-	public void setBucket(String bucket) {
+	public void setBucket(Bucket bucket) {
 		this.bucket = bucket;
 	}
 

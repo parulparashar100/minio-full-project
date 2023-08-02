@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.spring.configclient.database.entity.Bucket;
 import com.spring.configclient.database.entity.Data;
 import com.spring.configclient.database.service.impl.BucketServiceImpl;
 import com.spring.configclient.database.service.impl.DataServiceImpl;
@@ -57,7 +58,7 @@ public class MainService {
 			String uuidName = UUID.randomUUID().toString();
 			// push data on minio
 			MinioConnection.minioClient(accessKey, secretKey);
-			minio.pushObject(bucketName, encryptedData, uuidName);
+			minio.pushObject(bucketName, uuidName, encryptedData);
 
 			// generate UUID for database
 			String uuidKey = UUID.randomUUID().toString();
@@ -65,15 +66,20 @@ public class MainService {
 			// check for database
 			if (database.equals("mysql")) {
 				// insert data in mysql
+				Bucket b = new Bucket();
+				b.setBucketId("b1");
+				b.setBucketName("codetest");
+				b.setStatus("active");
+				
 				Data data = new Data();
 				data.setUuid(uuidKey);
 				data.setApiFileName(uuidName);
 				data.setDestinationFileName(destinationFileName);
 				data.setDestinationFilePath(destinationFilePath);
-				data.setBucket(bucketName);
+				data.setBucket(b);
 				data.setHashFile(hash);
 				data.setHashEncFile(encryptedHash);
-				data.setMetaData(metadata.toString());
+				data.setMetaData(null);
 				dataService.saveData(data);
 			} else {
 				// insert data in cockroachDB
@@ -153,9 +159,9 @@ public class MainService {
 			e.printStackTrace();
 		}
 
-		isEncrypt = prop.getProperty("isEncrypt");
-		encryptionKey = prop.getProperty("encryptionKey");
-		database = prop.getProperty("database");
+		isEncrypt = prop.getProperty("user.isEncrypt");
+		encryptionKey = prop.getProperty("user.encryptionKey");
+		database = prop.getProperty("user.database");
 		
 	}
 

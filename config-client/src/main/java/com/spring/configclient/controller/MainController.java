@@ -1,5 +1,8 @@
 package com.spring.configclient.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Base64;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -7,14 +10,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spring.configclient.service.MainService;
+import com.spring.configclient.template.ErrorResponse;
 import com.spring.configclient.template.Pull;
 import com.spring.configclient.template.Push;
+import com.spring.configclient.template.ResponseData;
 
 
 @RestController
@@ -25,9 +32,12 @@ public class MainController {
 	@Autowired
 	private ObjectMapper mapper;
 	
+	@Autowired
+	private MainService mainservice;
+	
 	@PostMapping("/upload")
 	
-	public ResponseEntity<?> pushData(@RequestBody Push pushData)
+	public ResponseEntity<?> pushData(@Validated @RequestBody Push pushData) throws Exception
 			
 			 
 	{
@@ -64,7 +74,8 @@ public class MainController {
 //			String value = "";
 			
 			
-			if (pushData.getMetaData() != null && !pushData.getMetaData().isEmpty()) {
+		/* Original validation
+		if (pushData.getMetaData() != null && !pushData.getMetaData().isEmpty()) {
 			    // Check if the mandatory key exists
 //			    if (pushData.getMetaData().isEmpty()) {
 //			        // Handle the missing mandatory key error
@@ -205,5 +216,65 @@ public class MainController {
 //			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid pull request");
 //		}
         return ResponseEntity.ok("Pull request success");
-    }
+    }*/
+		
+		if (pushData.getMetaData() != null && !pushData.getMetaData().isEmpty()) {
+	        for (Map.Entry<String, String> entry : pushData.getMetaData().entrySet()) {
+	            String key = entry.getKey();
+	            String value = entry.getValue();
+	            if (key == null || key.isBlank() || value == null || value.isBlank()) {
+	                ErrorResponse errorResponse = new ErrorResponse("Invalid metadata. Key and value are mandatory.");
+	                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+	            }
+
+	            logger.info("Metadata - Key: {}, Value: {}", key, value);
+	        }
+	    }
+
+	    // Perform other validations
+	    if (pushData.getPrivateKey() == null || pushData.getPrivateKey().isEmpty()
+	            || pushData.getSecretKey() == null || pushData.getSecretKey().isEmpty()
+	            || pushData.getBucketName() == null || pushData.getBucketName().isEmpty()
+	            || pushData.getFileName() == null || pushData.getFileName().isEmpty()) {
+	        ErrorResponse errorResponse = new ErrorResponse("Missing mandatory fields.");
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+	    }
+	    return ResponseEntity.ok(new ResponseData("Success", "Push request success"));
+	}
+	@PostMapping("/download")
+	public ResponseEntity<?> pullData(@Validated @RequestBody Pull pullData) {
+	    // ... existing code ...
+
+	    // Perform other validations
+	    if (pullData.getPrivateKey() == null || pullData.getPrivateKey().isEmpty()
+	            || pullData.getSecretKey() == null || pullData.getSecretKey().isEmpty()) {
+	        ErrorResponse errorResponse = new ErrorResponse("Missing mandatory fields.");
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+	    }
+
+	    // Check if either uuid is provided or both bucketName and fileName are provided
+	    if ((pullData.getUuid() == null || pullData.getUuid().isEmpty())
+	            && (pullData.getBucketName() == null || pullData.getBucketName().isEmpty()
+	            || pullData.getFileName() == null || pullData.getFileName().isEmpty())) {
+	        ErrorResponse errorResponse = new ErrorResponse("Either UUID is required or both bucket name and file name are required");
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+	    }
+
+	    // If only one of the following is provided, return an error
+	    if ((pullData.getUuid() != null && !pullData.getUuid().isEmpty())
+	            && (pullData.getBucketName() != null && !pullData.getBucketName().isEmpty()
+	            || pullData.getFileName() != null && !pullData.getFileName().isEmpty())) {
+	        ErrorResponse errorResponse = new ErrorResponse("UUID should be provided exclusively or both bucket name and file name should be provided");
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+	    }
+
+	    // Return success response
+	    return ResponseEntity.ok(new ResponseData("Success", "Pull request success"));
+	}
+
 }
+
+
+
+
+
