@@ -41,11 +41,110 @@ This project implements a simple text-based game called "Magical Arena" in Java.
 2. **Implement Game Logic**:
    - Create a Java class named `MagicalArena`.
    - Implement the game logic within this class, including player attributes, dice rolling, and the main game loop.
+
+      import java.util.Random;
+      class Player {
+          int health;
+          int strength;
+          int attack;
+      
+          public Player(int health, int strength, int attack) {
+              this.health = health;
+              this.strength = strength;
+              this.attack = attack;
+          }
+      }
+      
+      public class MagicalArena {
+          static Random random = new Random();
+      
+          public static int rollDie() {
+              return random.nextInt(6) + 1; // 1 to 6 sided die
+          }
+      
+          public static boolean fight(Player attacker, Player defender) {
+              int attackRoll = rollDie();
+              int defenseRoll = rollDie();
+      
+              int attackDamage = attacker.attack * attackRoll;
+              int defenseStrength = defender.strength * defenseRoll;
+      
+              int damageTaken = Math.max(0, attackDamage - defenseStrength);
+              defender.health -= damageTaken;
+      
+              System.out.println("Attacker rolls " + attackRoll + ", Defender rolls " + defenseRoll);
+              System.out.println("Attack damage: " + attackDamage + ", Defense strength: " + defenseStrength);
+              System.out.println("Defender health reduced by " + damageTaken + " to " + defender.health + "\n");
+              
+              return defender.health <= 0;
+          }
+      
+          public static void main(String[] args) {
+              Player playerA = new Player(50, 5, 10);
+              Player playerB = new Player(100, 10, 5);
+      
+              while (playerA.health > 0 && playerB.health > 0) {
+                  if (playerA.health < playerB.health) {
+                      fight(playerA, playerB);
+                      if (playerB.health <= 0) {
+                          System.out.println("Player A wins!");
+                          break;
+                      }
+                      fight(playerB, playerA);
+                      if (playerA.health <= 0) {
+                          System.out.println("Player B wins!");
+                          break;
+                      }
+                  } else {
+                      fight(playerB, playerA);
+                      if (playerA.health <= 0) {
+                          System.out.println("Player B wins!");
+                          break;
+                      }
+                      fight(playerA, playerB);
+                      if (playerB.health <= 0) {
+                          System.out.println("Player A wins!");
+                          break;    
+                      }
+                  }
+              }
+          }
+      }
+
+
    - Ensure to commit your changes regularly with descriptive commit messages.
 
 3. **Write Unit Tests**:
    - Create a JUnit test class named `MagicalArenaTests`.
    - Write test cases to validate the behavior of the `MagicalArena` class methods.
+
+      import org.junit.jupiter.api.Test;
+      import static org.junit.jupiter.api.Assertions.assertEquals;
+      import static org.junit.jupiter.api.Assertions.assertFalse;
+      import static org.junit.jupiter.api.Assertions.assertTrue;
+      
+      public class MagicalArenaTests {	
+      	
+      	@Test
+      	public void testGameEndsWhenPlayerHealthReachesZero() {
+      	    // Set up players with known attributes
+      	    Player playerA = new Player(50, 5, 10);
+      	    Player playerB = new Player(100, 10, 5);
+      
+      	    // Ensure player B's attack will reduce player A's health to 0 in one hit
+      	    playerB.attack = playerA.health / playerB.strength + 1;
+      
+      	    // Call the fight method
+      	    boolean gameEnded = MagicalArena.fight(playerB, playerA);
+      
+      	    // Verify that the game has ended and player A's health is 0
+      	    assertFalse(gameEnded);
+      	}
+      
+      
+      }
+
+     
    - Run the tests to ensure the correctness of the implementation.
 
 4. **Commit Changes**: Make frequent commits to track your progress and ensure version control. Use meaningful commit messages to describe the changes made.
